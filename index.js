@@ -71,10 +71,10 @@ inquirer.prompt([
 
 
 
-    if (optionPicked(answers.modules,"Grunt")) {
+    if (optionPicked(answers.modules,"Grunt") || optionPicked(answers.modules,"Gulp")) {
 
         console.log('');
-        console.log('Creating Grunt Config'.green);
+        console.log('Creating Project Config'.green);
         console.log( '' );
 
         inquirer.prompt( gruntQuestions, function( answers ) {
