@@ -9,6 +9,7 @@ var tools = require('./lib/helpers/tools.js');
 var buildWordpress = require('./lib/builds/wordpress.js');
 var buildStatic = require('./lib/builds/static.js');
 var buildJekyll = require('./lib/builds/jekyll.js');
+var buildMeteor = require('./lib/builds/meteor.js');
 
 
 tools.createTitle('Current directory: ' + process.cwd());
@@ -21,21 +22,22 @@ inquirer.prompt([{
         "Static",
         "Wordpress",
         "Jekyll",
-        "Random Build"
+        "Meteor",
+        "Failing Build"
     ]
 }], function (answers) {
     switch (answers.buildOption) {
       case "Static":
-        console.log("Static Site Picked!");
         buildStatic();
         break;
       case "Wordpress":
-        console.log("Wordpress Site Picked!");
         buildWordpress();
         break;
       case "Jekyll":
-        console.log("Jekyll Site Picked!");
         buildJekyll();
+        break;
+      case "Meteor":
+        buildMeteor();
         break;
       default:
         console.log("Sorry, there is no build associated with " + answers.buildOption + ".");
