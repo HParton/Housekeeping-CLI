@@ -12,13 +12,12 @@
   },
   "license": "ISC",
   "dependencies": {
-    "empty-dir": "^0.1.0",
+    "adm-zip": "^0.4.7",
+    "colors": "^1.1.2",
     "fs-extra": "^0.24.0",
     "inquirer": "^0.10.1",
     "ncp": "^2.0.0",
-    "adm-zip": "^0.4.7",
     "progress": "^1.1.8",
-    "request": "^2.65.0",
-    "colors": "^1.1.2"
+    "request": "^2.65.0"
   }
 }
