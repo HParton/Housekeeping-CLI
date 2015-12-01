@@ -1,57 +1,57 @@
 #! /usr/bin/env node
 // Load in external libraries
 var inquirer = require("inquirer");
+var path = require('path');
+var find = require('find-all');
+var _ = require("underscore");
+var colors = require('colors');
 
-// Load in some useful functions
-var tools = require('./lib/helpers/tools.js');
+var builds = [];
 
-// Load in our different build options
-var buildWordpress = require('./lib/builds/wordpress.js');
-var buildStatic = require('./lib/builds/static.js');
-var buildJekyll = require('./lib/builds/jekyll.js');
-var buildMeteor = require('./lib/builds/meteor.js');
+console.log('~ '.yellow + 'Finding installers config files...')
 
-
-tools.createTitle('Current directory: ' + process.cwd());
+find(path.dirname(require.main.filename) + '/lib/builds/**/*.{js,json}', function(path) {
+  var build = require(path);
+  var buildDetails = build().config();
+  buildDetails.path = path;
+  buildDetails.name = buildDetails.name.toLowerCase();
+  builds.push(buildDetails);
+  console.log('✔ '.green + 'Found: ' + buildDetails.name + ' -- ' + buildDetails.desc);
+});
 
 inquirer.prompt([{
     type: "list",
     message: "Select your site type",
     name: "buildOption",
-    choices: [
-        "Static",
-        "Wordpress",
-        "Jekyll",
-        "Meteor",
-        "Failing Build"
-    ]
+    choices: getAllBuildNames(builds, true)
 }], function (answers) {
-    switch (answers.buildOption) {
-      case "Static":
-        buildStatic();
-        break;
-      case "Wordpress":
-        buildWordpress();
-        break;
-      case "Jekyll":
-        buildJekyll();
-        break;
-      case "Meteor":
-        buildMeteor();
-        break;
-      default:
-        console.log("Sorry, there is no build associated with " + answers.buildOption + ".");
-    }
+    var selectedBuildPath = selectBuildByName(answers.buildOption, builds).path;
+    var selectedBuild = require(selectedBuildPath);
+    selectedBuild().init();
 });
 
+function selectBuildByName(name, builds) {
+    var found = _.select(builds, function (obj) {
+      return obj.name === name.toLowerCase();
+    });
+    return found[0];
+}
 
+function getAllBuildNames(builds, capitalise) {
+    var buildNames = [];
 
+    for (var i = 0; i < builds.length; i++) {
+        var buildName = builds[i].name;
+        if (capitalise) {
+            var buildName = ucfirst(buildName);
+        }
+        buildNames.push(buildName);
+    }
 
+    return buildNames;
+}
 
-
-
-
-
-
-
-
+function ucfirst(str) {
+    var firstLetter = str.substr(0, 1);
+    return firstLetter.toUpperCase() + str.substr(1);
+}
