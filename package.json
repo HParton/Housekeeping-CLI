@@ -10,6 +10,13 @@
   "bin": {
     "hk": "index.js"
   },
+  "keywords": [
+    "scaffold",
+    "global",
+    "generate",
+    "generator"
+  ],
+  "bugs": "https://github.com/HParton/Housekeeping-cli/issues",
   "license": "ISC",
   "dependencies": {
     "adm-zip": "0.4.7",
