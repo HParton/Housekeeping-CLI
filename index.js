@@ -5,6 +5,7 @@ var path = require('path');
 var find = require('find-all');
 var _ = require("underscore");
 var colors = require('colors');
+var helper = require('./lib/utils/helpers.js');
 
 var builds = [];
 
@@ -16,7 +17,9 @@ find(path.dirname(require.main.filename) + '/lib/builds/**/*.{js,json}', functio
   buildDetails.path = path;
   buildDetails.name = buildDetails.name.toLowerCase();
   builds.push(buildDetails);
-  console.log('✔ '.green + 'Found: ' + buildDetails.name + ' -- ' + buildDetails.desc);
+  if (helper.verboseMode()) {
+      console.log('✔ '.green + 'Found: ' + buildDetails.name + ' -- ' + buildDetails.desc);
+  }
 });
 
 inquirer.prompt([{
