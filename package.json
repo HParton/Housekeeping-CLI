@@ -1,7 +1,7 @@
 {
   "name": "housekeeping",
-  "version": "0.2.4",
-  "description": "CLI for creating new projects and other common tasks i need to run in one place.",
+  "version": "0.2.6",
+  "description": "CLI for creating new projects all in one place.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
