@@ -16,6 +16,10 @@
     "generate",
     "generator"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HParton/Housekeeping-cli.git"
+  },
   "bugs": "https://github.com/HParton/Housekeeping-cli/issues",
   "license": "ISC",
   "dependencies": {
