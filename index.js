@@ -9,7 +9,7 @@ var helper = require('./lib/utils/helpers.js');
 var program = require('commander');
 var argv = require('minimist')(process.argv.slice(2));
 var exec = require('child_process').exec;
-
+var ncu = require('npm-check-updates');
 
 program
   .version('0.2.6')
@@ -25,7 +25,7 @@ if (program.debug) {
 }
 
 
-var buildsDir = path.dirname(require.main.filename) + '/lib/builds/';
+var buildsDir = path.dirname(require.main.filename);
 
 
 if (program.add) {
@@ -33,7 +33,7 @@ if (program.add) {
   if (typeof program.add == 'string') {
     console.log('~ '.yellow + 'Finding package for ' + program.add + '...');
     // TRYING TO GET IT INSTALL SOMEWHERE V
-    run('npm install ' + program.add, {cwd: buildsDir});
+    run('npm install --save-optional ' + program.add, {cwd: buildsDir});
   } else {
     console.log('✘ '.red + 'Please select a package to add');
   }
@@ -42,16 +42,32 @@ if (program.add) {
 
   if (typeof program.update == 'string') {
     console.log('~ '.yellow + 'Updating package for ' + program.update + '...');
-    run('npm install ' + program.update, {cwd: buildsDir});
+    ncu.run({
+        packageFile: buildsDir + '/package.json',
+        upgrade: true,
+        jsonUpgraded: false,
+        args: [program.update, '-u']
+    }).then(function(upgraded) {
+        console.log('✔ '.green + program.update + ' updated');
+    });
   } else {
-    console.log('✘ '.red + 'Please select a package to update');
+    console.log('~ '.yellow + 'Updating packages for all builds...');
+    ncu.run({
+        packageFile: buildsDir +'/package.json',
+        optional: true,
+        upgrade: true,
+        jsonUpgraded: false
+    }).then(function(upgraded) {
+        run('npm update', {cwd: buildsDir})
+        console.log('✔ '.green + 'All builds updated');
+    });
   }
 
 } else if (program.remove) {
 
   if (typeof program.remove == 'string') {
     console.log('~ '.yellow + 'Removing package for ' + program.remove + '...');
-    run('npm remove ' + program.remove, {cwd: buildsDir});
+    run('npm remove --save-optional ' + program.remove, {cwd: buildsDir});
   } else {
     console.log('✘ '.red + 'Please select a package to remove');
   }
@@ -98,7 +114,7 @@ function selectBuildPrompt(builds) {
 function getAllBuilds() {
   var builds = [];
 
-  find(path.dirname(require.main.filename) + '/lib/builds/**/hk-*.js', function(path) {
+  find(path.dirname(require.main.filename) + '/node_modules/**/hk-*.js', function(path) {
     var build = require(path);
     var buildDetails = build().config();
     buildDetails.path = path;
