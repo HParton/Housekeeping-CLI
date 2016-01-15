@@ -6,11 +6,46 @@ var find = require('find-all');
 var _ = require("underscore");
 var colors = require('colors');
 var helper = require('./lib/utils/helpers.js');
+var program = require('commander');
 
 var builds = [];
 
 console.log('~ '.yellow + 'Finding installers config files...')
+program
+  .version('0.2.6')
+  .option('add [build]', 'Add a npm hosted build generator')
+  .option('remove [build]', 'Remove a npm hosted  build generator')
+  .option('update [build]', 'Update a npm hosted  build generator')
+  .option('-v, --verbose', 'Enable extra information and errors')
+  .option('-d, --debug', 'Enable extra information for debugging')
+  .parse(process.argv);
 
+
+
+
+
+if (program.add) {
+
+  if (typeof program.add == 'string') {
+  } else {
+    console.log('✘ '.red + 'Please select a package to add');
+  }
+
+} else if (program.update) {
+
+  if (typeof program.update == 'string') {
+  } else {
+    console.log('✘ '.red + 'Please select a package to update');
+  }
+
+} else if (program.remove) {
+
+  if (typeof program.remove == 'string') {
+  } else {
+  }
+
+} else {
+}
   }
 });
 
