@@ -8,6 +8,7 @@ var colors = require('colors');
 var helper = require('./lib/utils/helpers.js');
 var program = require('commander');
 var argv = require('minimist')(process.argv.slice(2));
+var exec = require('child_process').exec;
 
 var builds = [];
 
@@ -31,6 +32,9 @@ if (program.debug) {
 if (program.add) {
 
   if (typeof program.add == 'string') {
+    console.log('~ '.yellow + 'Finding package for ' + program.add + '...');
+    // TRYING TO GET IT INSTALL SOMEWHERE V
+    run('npm install ' + program.add, {cwd: buildsDir});
   } else {
     console.log('✘ '.red + 'Please select a package to add');
   }
@@ -38,6 +42,8 @@ if (program.add) {
 } else if (program.update) {
 
   if (typeof program.update == 'string') {
+    console.log('~ '.yellow + 'Updating package for ' + program.update + '...');
+    run('npm install ' + program.update, {cwd: buildsDir});
   } else {
     console.log('✘ '.red + 'Please select a package to update');
   }
@@ -45,13 +51,36 @@ if (program.add) {
 } else if (program.remove) {
 
   if (typeof program.remove == 'string') {
+    console.log('~ '.yellow + 'Removing package for ' + program.remove + '...');
+    run('npm remove ' + program.remove, {cwd: buildsDir});
   } else {
+    console.log('✘ '.red + 'Please select a package to remove');
   }
 
 } else {
+  console.log('~ '.yellow + 'Finding installers config files...')
+  var builds = getAllBuilds();
+  selectBuildPrompt(builds);
 }
+
+
+
+function run(cmd, location){
+  if (location == undefined) {
+    location = './';
   }
-});
+  var child = exec(cmd, location, function (error, stdout, stderr) {
+    if (stderr !== null) {
+      console.log('' + stderr);
+    }
+    if (stdout !== null) {
+      console.log('' + stdout);
+    }
+    if (error !== null) {
+      console.log('' + error);
+    }
+  });
+};
 
 inquirer.prompt([{
     type: "list",
