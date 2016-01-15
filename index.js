@@ -7,6 +7,7 @@ var _ = require("underscore");
 var colors = require('colors');
 var helper = require('./lib/utils/helpers.js');
 var program = require('commander');
+var argv = require('minimist')(process.argv.slice(2));
 
 var builds = [];
 
@@ -20,6 +21,9 @@ program
   .option('-d, --debug', 'Enable extra information for debugging')
   .parse(process.argv);
 
+if (program.debug) {
+  console.log(argv);
+}
 
 
 
