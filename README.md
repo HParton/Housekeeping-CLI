@@ -26,7 +26,6 @@ hk update [build] : Update a build, uses the npm package name.
 
 -d, -debug : debug mode
 -v, -verbose : verbose mode
-
 -V, --version : version
 -h, --help : Help
 
