@@ -66,7 +66,7 @@ if (program.add) {
 } else if (program.remove) {
 
   if (typeof program.remove == 'string') {
-    console.log('~ '.yellow + 'Removing package for ' + program.remove + '...');
+    console.log('~ '.yellow + 'Removing package ' + program.remove + ' from housekeeping...');
     run('npm remove --save-optional ' + program.remove, {cwd: buildsDir});
   } else {
     console.log('✘ '.red + 'Please select a package to remove');
