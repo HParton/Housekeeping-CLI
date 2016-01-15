@@ -75,7 +75,12 @@ if (program.add) {
 } else {
   console.log('~ '.yellow + 'Finding installers config files...')
   var builds = getAllBuilds();
+
+  if (builds.length) {
   selectBuildPrompt(builds);
+  } else {
+    console.log('✘ '.red + 'Couldn\'t find any builds, make sure you added some');
+  }
 }
 
 
