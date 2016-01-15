@@ -10,9 +10,7 @@ var program = require('commander');
 var argv = require('minimist')(process.argv.slice(2));
 var exec = require('child_process').exec;
 
-var builds = [];
 
-console.log('~ '.yellow + 'Finding installers config files...')
 program
   .version('0.2.6')
   .option('add [build]', 'Add a npm hosted build generator')
@@ -27,6 +25,7 @@ if (program.debug) {
 }
 
 
+var buildsDir = path.dirname(require.main.filename) + '/lib/builds/';
 
 
 if (program.add) {
@@ -82,16 +81,20 @@ function run(cmd, location){
   });
 };
 
-inquirer.prompt([{
+
+function selectBuildPrompt(builds) {
+  inquirer.prompt([{
     type: "list",
     message: "Select your site type",
     name: "buildOption",
     choices: getAllBuildNames(builds, true)
-}], function (answers) {
-    var selectedBuildPath = selectBuildByName(answers.buildOption, builds).path;
-    var selectedBuild = require(selectedBuildPath);
-    selectedBuild().init();
-});
+  }], function (answers) {
+      var selectedBuildPath = selectBuildByName(answers.buildOption, builds).path;
+      var selectedBuild = require(selectedBuildPath);
+      selectedBuild().init();
+  });
+}
+
 function getAllBuilds() {
   var builds = [];
 
@@ -106,6 +109,9 @@ function getAllBuilds() {
         console.log('✔ '.green + 'Found: ' + buildDetails.name + ' -- ' + buildDetails.desc);
     }
   });
+
+  return builds;
+}
 
 function selectBuildByName(name, builds) {
     var found = _.select(builds, function (obj) {
