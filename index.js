@@ -11,14 +11,6 @@ var builds = [];
 
 console.log('~ '.yellow + 'Finding installers config files...')
 
-find(path.dirname(require.main.filename) + '/lib/builds/**/*.{js,json}', function(path) {
-  var build = require(path);
-  var buildDetails = build().config();
-  buildDetails.path = path;
-  buildDetails.name = buildDetails.name.toLowerCase();
-  builds.push(buildDetails);
-  if (helper.verboseMode()) {
-      console.log('✔ '.green + 'Found: ' + buildDetails.name + ' -- ' + buildDetails.desc);
   }
 });
 
@@ -32,6 +24,20 @@ inquirer.prompt([{
     var selectedBuild = require(selectedBuildPath);
     selectedBuild().init();
 });
+function getAllBuilds() {
+  var builds = [];
+
+  find(path.dirname(require.main.filename) + '/lib/builds/**/hk-*.js', function(path) {
+    var build = require(path);
+    var buildDetails = build().config();
+    buildDetails.path = path;
+    buildDetails.name = buildDetails.name.toLowerCase();
+    builds.push(buildDetails);
+
+    if (program.verbose) {
+        console.log('✔ '.green + 'Found: ' + buildDetails.name + ' -- ' + buildDetails.desc);
+    }
+  });
 
 function selectBuildByName(name, builds) {
     var found = _.select(builds, function (obj) {
