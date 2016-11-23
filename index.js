@@ -98,7 +98,15 @@ if (program.remove) {
 
   if (typeof program.remove == 'string') {
     console.log('~ '.yellow + 'Removing package ' + program.remove + ' from housekeeping...');
-    run('npm remove ' + program.remove, {cwd: buildsDir});
+    run('npm remove ' + program.remove, {cwd: buildsDir}, function() {
+      var builds = conf.get('builds');
+      var index = builds.map(function(build) {
+        return build.name;
+      }).indexOf(program.remove);
+
+      builds.splice(index, 1);
+      conf.set('builds', builds);
+    });
   } else {
     console.log('✘ '.red + 'Please select a package to remove');
   }
