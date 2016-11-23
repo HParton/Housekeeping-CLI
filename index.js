@@ -2,10 +2,8 @@
 // Load in external libraries
 var inquirer = require("inquirer");
 var path = require('path');
-var find = require('find-all');
 var _ = require("underscore");
 var colors = require('colors');
-var helper = require('./lib/utils/helpers.js');
 var program = require('commander');
 var argv = require('minimist')(process.argv.slice(2));
 var exec = require('child_process').exec;
@@ -35,7 +33,7 @@ var buildsDir = path.dirname(require.main.filename);
 if (program.add) {
 
   if (typeof program.add == 'string') {
-    console.log('~ '.yellow + 'Finding package for ' + program.add + '...');
+    info('Finding package for ' + program.add + '...');
 
     run('npm install ' + program.add, {cwd: buildsDir}, function() {
       run('npm view ' + program.add, {cwd: buildsDir}, function(stdout) {
@@ -55,12 +53,14 @@ if (program.add) {
         var currentBuilds = conf.get('builds');
         currentBuilds.push(build);
         conf.set('builds', currentBuilds);
+
+        success(program.add + ' added.');
       })
     });
 
 
   } else {
-    console.log('✘ '.red + 'Please select a package to add');
+    warn('Please select a package to add');
   }
 
   return;
@@ -69,17 +69,19 @@ if (program.add) {
 if (program.update) {
 
   if (typeof program.update == 'string') {
-    console.log('~ '.yellow + 'Updating package for ' + program.update + '...');
+    info('Updating package for ' + program.update + '...');
     ncu.run({
         packageFile: buildsDir + '/package.json',
         upgrade: true,
         jsonUpgraded: false,
         args: [program.update, '-u']
     }).then(function(upgraded) {
-        console.log('✔ '.green + program.update + ' updated');
+        // TODO: Update the versions in the config file for this build.
+        // TODO: Check if the version is newer before assuming it updated.
+        success(program.update + ' updated');
     });
   } else {
-    console.log('~ '.yellow + 'Updating packages for all builds...');
+    info('Updating packages for all builds...');
     ncu.run({
         packageFile: buildsDir +'/package.json',
         optional: true,
@@ -87,7 +89,8 @@ if (program.update) {
         jsonUpgraded: false
     }).then(function(upgraded) {
         run('npm update', {cwd: buildsDir})
-        console.log('✔ '.green + 'All builds updated');
+        // TODO: Update the versions in the config file for all affected packages.
+        success('All builds updated');
     });
   }
 
@@ -106,22 +109,24 @@ if (program.remove) {
 
       builds.splice(index, 1);
       conf.set('builds', builds);
+
+      success(program.remove + ' removed.');
     });
   } else {
-    console.log('✘ '.red + 'Please select a package to remove');
+    warn('Please select a package to remove');
   }
 
   return;
 }
 
 if (!program.update && !program.add && !program.remove) {
-  console.log('~ '.yellow + 'Finding installers config files...')
+  info('Finding installers config files...')
   var builds = getAllBuilds();
 
   if (builds.length) {
     selectBuildPrompt(builds);
   } else {
-    console.log('✘ '.red + 'Couldn\'t find any builds, make sure you added some with [hk add]');
+    warn('Couldn\'t find any builds, make sure you added some with [hk add]');
   }
 }
 
@@ -154,12 +159,13 @@ function run(cmd, location, cb){
 function selectBuildPrompt(builds) {
   inquirer.prompt([{
     type: "list",
-    message: "Select your site type",
+    message: "Installed builds",
     name: "buildOption",
     choices: builds
   }], function (answers) {
       var selectedBuild = require('./node_modules/'+answers.buildOption);
-      selectedBuild().init();
+      info('Running ' + answers.buildOption + '...');
+      selectedBuild();
   });
 }
 
@@ -168,7 +174,7 @@ function getAllBuilds() {
 
   if (program.verbose) {
     for (var i = 0; i < builds.length; i++) {
-        console.log('✔ '.green + 'Found: ' + builds[i].name);
+        success('Found: ' + builds[i].name);
     }
   }
 
@@ -181,6 +187,18 @@ function getAllBuildNames(builds) {
   for (var i = 0; i < builds.length; i++) {
     names.push(builds[i].name)
   }
+}
+
+function success(string) {
+  console.log('✔ '.green + string);
+}
+
+function info(string) {
+  console.log('~ '.yellow + string);
+}
+
+function warn(string) {
+  console.log('✘ '.red + string);
 }
 
 function selectBuildByName(name, builds) {
