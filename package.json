@@ -1,9 +1,9 @@
 {
   "name": "housekeeping",
-  "version": "0.2.6",
+  "version": "0.3",
   "description": "CLI for creating new projects all in one place.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "scripts/install.js"
   },
   "author": "HParton",
   "preferGlobal": true,
@@ -23,15 +23,15 @@
   "bugs": "https://github.com/HParton/Housekeeping-cli/issues",
   "license": "ISC",
   "dependencies": {
-    "adm-zip": "0.4.7",
     "colors": "1.1.2",
+    "commander": "^2.9.0",
     "find-all": "0.0.1",
-    "fs-extra": "0.24.0",
     "inquirer": "0.10.1",
     "minimist": "^1.2.0",
-    "ncp": "2.0.0",
-    "progress": "1.1.8",
-    "request": "2.65.0",
+    "npm-check-updates": "^2.5.6",
     "underscore": "1.8.3"
+  },
+  "devDependencies": {
+    "configstore": "^2.1.0"
   }
 }
