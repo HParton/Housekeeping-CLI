@@ -11,6 +11,11 @@ var argv = require('minimist')(process.argv.slice(2));
 var exec = require('child_process').exec;
 var ncu = require('npm-check-updates');
 
+var Configstore = require('configstore')
+var pkg = require('./package.json');
+
+var conf = new Configstore(pkg.name, {builds: []});
+
 program
   .version('0.2.6')
   .option('add [build]', 'Add a npm hosted build generator')
@@ -27,18 +32,41 @@ if (program.debug) {
 
 var buildsDir = path.dirname(require.main.filename);
 
-
 if (program.add) {
 
   if (typeof program.add == 'string') {
     console.log('~ '.yellow + 'Finding package for ' + program.add + '...');
-    // TRYING TO GET IT INSTALL SOMEWHERE V
-    run('npm install --save-optional ' + program.add, {cwd: buildsDir});
+
+    run('npm install ' + program.add, {cwd: buildsDir}, function() {
+      run('npm view ' + program.add, {cwd: buildsDir}, function(stdout) {
+        var details = eval('(' + stdout + ')');
+
+        var build = {
+          name: details.name,
+          description: details.description,
+          version: details.version,
+          maintainers: details.maintainers
+        }
+
+        if (program.verbose) {
+          console.log(build);
+        }
+
+        var currentBuilds = conf.get('builds');
+        currentBuilds.push(build);
+        conf.set('builds', currentBuilds);
+      })
+    });
+
+
   } else {
     console.log('✘ '.red + 'Please select a package to add');
   }
 
-} else if (program.update) {
+  return;
+}
+
+if (program.update) {
 
   if (typeof program.update == 'string') {
     console.log('~ '.yellow + 'Updating package for ' + program.update + '...');
@@ -63,41 +91,53 @@ if (program.add) {
     });
   }
 
-} else if (program.remove) {
+  return;
+}
+
+if (program.remove) {
 
   if (typeof program.remove == 'string') {
     console.log('~ '.yellow + 'Removing package ' + program.remove + ' from housekeeping...');
-    run('npm remove --save-optional ' + program.remove, {cwd: buildsDir});
+    run('npm remove ' + program.remove, {cwd: buildsDir});
   } else {
     console.log('✘ '.red + 'Please select a package to remove');
   }
 
-} else {
+  return;
+}
+
+if (!program.update && !program.add && !program.remove) {
   console.log('~ '.yellow + 'Finding installers config files...')
   var builds = getAllBuilds();
 
   if (builds.length) {
-  selectBuildPrompt(builds);
+    selectBuildPrompt(builds);
   } else {
-    console.log('✘ '.red + 'Couldn\'t find any builds, make sure you added some');
+    console.log('✘ '.red + 'Couldn\'t find any builds, make sure you added some with [hk add]');
   }
 }
 
 
-
-function run(cmd, location){
+function run(cmd, location, cb){
   if (location == undefined) {
     location = './';
   }
+
   var child = exec(cmd, location, function (error, stdout, stderr) {
-    if (stderr !== null) {
-      console.log('' + stderr);
-    }
-    if (stdout !== null) {
-      console.log('' + stdout);
-    }
     if (error !== null) {
       console.log('' + error);
+    }
+
+    if (cb) {
+      cb(stdout);
+    } else {
+      if (stderr !== null) {
+        console.log('' + stderr);
+      }
+
+      if (stdout !== null) {
+        console.log('' + stdout);
+      }
     }
   });
 };
@@ -108,30 +148,31 @@ function selectBuildPrompt(builds) {
     type: "list",
     message: "Select your site type",
     name: "buildOption",
-    choices: getAllBuildNames(builds, true)
+    choices: builds
   }], function (answers) {
-      var selectedBuildPath = selectBuildByName(answers.buildOption, builds).path;
-      var selectedBuild = require(selectedBuildPath);
+      var selectedBuild = require('./node_modules/'+answers.buildOption);
       selectedBuild().init();
   });
 }
 
 function getAllBuilds() {
-  var builds = [];
+  var builds = conf.get('builds');
 
-  find(path.dirname(require.main.filename) + '/node_modules/**/hk-*.js', function(path) {
-    var build = require(path);
-    var buildDetails = build().config();
-    buildDetails.path = path;
-    buildDetails.name = buildDetails.name.toLowerCase();
-    builds.push(buildDetails);
-
-    if (program.verbose) {
-        console.log('✔ '.green + 'Found: ' + buildDetails.name + ' -- ' + buildDetails.desc);
+  if (program.verbose) {
+    for (var i = 0; i < builds.length; i++) {
+        console.log('✔ '.green + 'Found: ' + builds[i].name);
     }
-  });
+  }
 
   return builds;
+}
+
+function getAllBuildNames(builds) {
+  var names = [];
+
+  for (var i = 0; i < builds.length; i++) {
+    names.push(builds[i].name)
+  }
 }
 
 function selectBuildByName(name, builds) {
@@ -139,23 +180,4 @@ function selectBuildByName(name, builds) {
       return obj.name === name.toLowerCase();
     });
     return found[0];
-}
-
-function getAllBuildNames(builds, capitalise) {
-    var buildNames = [];
-
-    for (var i = 0; i < builds.length; i++) {
-        var buildName = builds[i].name;
-        if (capitalise) {
-            var buildName = ucfirst(buildName);
-        }
-        buildNames.push(buildName);
-    }
-
-    return buildNames;
-}
-
-function ucfirst(str) {
-    var firstLetter = str.substr(0, 1);
-    return firstLetter.toUpperCase() + str.substr(1);
 }
