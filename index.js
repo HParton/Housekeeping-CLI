@@ -36,6 +36,10 @@ if (program.add) {
     info('Finding package for ' + program.add + '...');
 
     run('npm install ' + program.add, {cwd: buildsDir}, function() {
+      run('npm install', {cwd: buildsDir + '/node_modules/' + program.add}, function() {
+        success(program.add + ' dependencies installed.');
+      })
+
       run('npm view ' + program.add, {cwd: buildsDir}, function(stdout) {
         var details = eval('(' + stdout + ')');
 
@@ -143,7 +147,9 @@ function run(cmd, location, cb){
 
     if (cb) {
       cb(stdout);
-    } else {
+    }
+
+    if (!cb || program.verbose) {
       if (stderr !== null) {
         console.log('' + stderr);
       }

@@ -1,6 +1,6 @@
 {
   "name": "housekeeping",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.1",
   "description": "CLI for creating new projects all in one place.",
   "scripts": {
     "test": "scripts/install.js"
